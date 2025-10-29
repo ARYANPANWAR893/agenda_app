@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<head>
+  <style>
+/* Conteneur des filtres */
+.filter-container {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de passer à la ligne si nécessaire */
+    gap: 30px;
+    margin-bottom: 30px;
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    align-items: flex-start; /* Aligne les éléments en haut */
+}
+
+/* Styles pour chaque champ de filtre */
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-basis: 200px; /* Assure une largeur minimum mais flexible */
+}
+
+/* Styles des labels */
+.filter-item label {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+}
+
+/* Styles des champs de saisie (input et select) */
+.filter-container input,
+.filter-container select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background-color: #f0f0f0;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Effet de focus sur les champs de saisie */
+.filter-container input:focus,
+.filter-container select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.6);
+    outline: none;
+}
+
+/* Styles du bouton de filtrage */
+.filter-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.3s;
+    cursor: pointer;
+    flex-basis: 100%; /* Le bouton prendra toute la largeur du conteneur */
+    margin-top: 10px;
+}
+
+/* Effet de survol sur le bouton */
+.filter-button:hover {
+    background-color: #0056b3;
+}
+
+/* Design de la flèche dans le select */
+.filter-container select {
+    appearance: none;
+    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Cpath d="M1 4l7 7 7-7z" fill="%23007bff" /%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 12px;
+}
+
+/* Ajout d'espacement entre les éléments */
+.filter-container > * {
+    margin-bottom: 15px;
+}
+  /* Design de la carte des événements */
+    .event-list-card {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .event-list-card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .event-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .event-info {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .btn-custom {
+      padding: 10px 20px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    /* Boutons dans les cartes */
+    .btn-info {
+      background-color: #17a2b8;
+      color: white;
+    }
+
+    .btn-info:hover {
+      background-color: #138496;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+
+    .btn-warning {
+      background-color: #ffc107;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background-color: #e0a800;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #218838;
+    }
+
+    /* Conteneur des boutons */
+    .button-group {
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Styles pour les boutons */
+    .button-group .btn {
+      border-radius: 5px;
+      padding: 8px 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .button-group .btn-outline-success {
+      color: white;
+      background-color: #28a745;
+      border: 1px solid #28a745;
+    }
+
+    .button-group .btn-outline-success:hover {
+      color: #28a745;
+      background-color: white;
+      border: 1px solid #28a745;
+    }
+
+    .button-group .btn-outline-danger {
+      color: white;
+      background-color: #dc3545;
+      border: 1px solid #dc3545;
+    }
+
+    .button-group .btn-outline-danger:hover {
+      color: #dc3545;
+      background-color: white;
+      border: 1px solid #dc3545;
+    }
+
+    .button-group .btn-outline-warning {
+      color: white;
+      background-color: #ffc107;
+      border: 1px solid #ffc107;
+    }
+
+    .button-group .btn-outline-warning:hover {
+      color: #ffc107;
+      background-color: white;
+      border: 1px solid #ffc107;
+    }
+
+  </style>
+</head>
+
+<div id="js-flash-container"></div>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-secondary text-white">
+        📝 Tâches affectées
+      </div>
+      <div class="card-body">
+
+        <!-- Conteneur pour les boutons -->
+        <div class="button-group">
+<!-- Bouton pour exporter les tâches affectées -->
+<a href="{{ url_for('export_taches_affectees') }}" class="btn btn-sm btn-outline-success">⬇️ Exporter les tâches affectées</a>
+
+          <!-- Formulaire pour vider la liste des tâches -->
+          <form method="POST" action="{{ url_for('vider_taches_affectees') }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir vider toutes les tâches affectées ? Cette action est irréversible !');">
+                Vider la liste des tâches affectées
+            </button>
+        </form>
+        </div>
+        <form method="GET" action="{{ url_for('taches_affectees') }}" class="filter-container">
+          <!-- Filtrer par Date -->
+          <div class="filter-item">
+            <label for="date-filter">Filtrer par Date :</label>
+            <input type="date" id="date-filter" name="date" value="{{ filter_date }}">
+          </div>
+        
+          <!-- Filtrer par Heure -->
+          <div class="filter-item">
+            <label for="time-filter">Filtrer par Heure :</label>
+            <input type="time" id="time-filter" name="time" value="{{ filter_time }}">
+          </div>
+        
+          <!-- Filtrer par Pôle -->
+          <div class="filter-item">
+            <label for="pole-filter">Filtrer par Pôle :</label>
+            <select id="pole-filter" name="pole">
+              <option value="">--Tous--</option>
+              <option value="Pôle Compta" {% if filter_pole == 'Pôle Compta' %}selected{% endif %}>Pôle Compta</option>
+              <option value="Pôle Social" {% if filter_pole == 'Pôle Social' %}selected{% endif %}>Pôle Social</option>
+              <option value="Pôle juridique" {% if filter_pole == 'Pôle juridique' %}selected{% endif %}>Pôle juridique</option>
+              <option value="Pôle Communication" {% if filter_pole == 'Pôle Communication' %}selected{% endif %}>Pôle Communication</option>
+              <option value="Assistance Compta" {% if filter_pole == 'Assistance Compta' %}selected{% endif %}>Assistance Compta</option>
+              <option value="Assistance Paie" {% if filter_pole == 'Assistance Paie' %}selected{% endif %}>Assistance Paie</option>
+              <option value="Assistance Communication" {% if filter_pole == 'Assistance Communication' %}selected{% endif %}>Assistance Communication</option>
+              <option value="Assistance juridique" {% if filter_pole == 'Assistance juridique' %}selected{% endif %}>Assistance juridique</option>
+
+            </select>
+          </div>
+        
+          <!-- Filtrer par Priorité -->
+          <div class="filter-item">
+            <label for="priorite-filter">Filtrer par Priorité :</label>
+            <select id="priorite-filter" name="priorite">
+              <option value="">--Toutes--</option>
+              <option value="Haute" {% if filter_priorite == 'Haute' %}selected{% endif %}>Haute</option>
+              <option value="Moyenne" {% if filter_priorite == 'Moyenne' %}selected{% endif %}>Moyenne</option>
+              <option value="Basse" {% if filter_priorite == 'Basse' %}selected{% endif %}>Basse</option>
+            </select>
+          </div>
+        
+          <!-- Bouton de filtrage -->
+          <button type="submit" class="filter-button">Filtrer</button>
+        </form>
+        
+       
+        
+        </nav>
+        
+        <!-- Formulaire pour reporter les tâches -->
+        <form method="POST" action="{{ url_for('reporter_evenements') }}" class="mb-3">
+
+          {% set groupes = {} %}
+          {% for e in events %}
+            {% set key = e.classe %}
+            {% if key not in groupes %}
+              {% set _ = groupes.update({key: []}) %}
+            {% endif %}
+            {% set _ = groupes[key].append(e) %}
+          {% endfor %}
+
+          <!-- Affichage des tâches par groupe (classe) -->
+          {% for classe, elist in groupes.items() %}
+            <h6 class="mt-3 text-primary">📘 {{ classe }}</h6>
+            <ul class="list-group mb-2">
+              {% for ev in elist %}
+                <li class="list-group-item
+                    {% if ev.classe == 'Direction' %}list-group-item-primary
+                    {% elif ev.classe == 'Pôle Compta' %}list-group-item-success
+                    {% elif ev.classe == 'Pôle Social' %}list-group-item-warning
+                    {% elif ev.classe == 'Pôle juridique' %}list-group-item-danger
+                    {% elif ev.classe == 'Pôle Communication' %}list-group-item-info
+                    {% elif ev.classe.startswith('Assistance') %}list-group-item-secondary
+                    {% else %}list-group-item-light
+                    {% endif %}" id="event-{{ ev.id }}">
+
+                    {% if is_Dir %}
+                    <!-- Affichage des utilisateurs affectés -->
+                    <span class="badge bg-info text-dark mt-1">
+                      {% for user in ev.users %}
+                        {{ user }}{% if not loop.last %}, {% endif %}
+                      {% endfor %}
+                    </span>
+                  {% endif %}
+                  <br>
+                  <br>
+                  <p><strong>Titre :</strong> {{ ev.title }}</p>
+                  <p><strong>Classe :</strong> {{ ev.classe }}</p>
+                  <p><strong>Date :</strong> {{ ev.start }}</p>
+
+                  <!-- Lien vers les détails de la tâche -->
+                  <a href="{{ url_for('tache_detail', event_id=ev.id) }}" class="btn btn-info mt-2">Voir les détails</a>
+
+                 
+                  
+                  {% if ev.attachment %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ ev.attachment) }}" target="_blank" class="btn btn-sm btn-info mt-2 me-2">
+                      📎 Voir la pièce jointe
+                    </a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">Aucune tâche à afficher.</p>
+          {% endfor %}
+
+        </form>
+
+        <!-- Pagination -->
+        <nav aria-label="Pagination des tâches" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+              <a class="page-link" href="{{ url_for('taches_affectees', page=page-1) }}" tabindex="-1">Précédent</a>
+            </li>
+            {% for p in range(1, total_pages + 1) %}
+              <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('taches_affectees', page=p) }}">{{ p }}</a>
+              </li>
+            {% endfor %}
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+              <a class="page-link" href="{{ url_for('taches_affectees', page=page+1) }}">Suivant</a>
+            </li>
+          </ul>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentEventId = null;
+
+  function deleteEvent(eventId) {
+    // Envoie une requête POST pour supprimer l'événement
+    fetch(`/delete_event/${eventId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Supprimer l'élément de la page sans recharger la page
+            const eventElement = document.getElementById(`event-${eventId}`);
+            if (eventElement) {
+                eventElement.remove();  // Supprimer l'élément du DOM
+            }
+            showFlashMessage("success", "🗑️ Tâche supprimée avec succès.");
+        } else if (data.error) {
+            showFlashMessage("danger", "❌ " + data.error);
+        }
+    })
+    .catch(error => {
+        showFlashMessage("danger", "❌ Erreur de connexion avec le serveur.");
+    });
+}
+
+
+function showFlashMessage(category, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${category} alert-dismissible fade show mt-3`;
+    alertDiv.role = "alert";
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    const container = document.getElementById('js-flash-container') || document.body;
+    container.prepend(alertDiv);
+    setTimeout(() => {
+        alertDiv.classList.remove("show");
+        alertDiv.classList.add("hide");
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 3000);
+}
+
+  // Confirmation de suppression d'une seule tâche
+  document.getElementById('confirmDeleteButton').onclick = function() {
+    fetch(`/delete_event/${currentEventId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Enlève la tâche de la page sans reload
+            document.getElementById(`event-${currentEventId}`)?.remove();
+            showFlashMessage("success", "🗑️ La tâche a été supprimée avec succès.");
+            // Ferme la modale
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+        } else if (data.error) {
+            showFlashMessage("danger", "❌ " + data.error);
+        }
+    })
+    .catch(error => {
+        showFlashMessage("danger", "❌ Erreur de connexion avec le serveur.");
+    });
+};
+
+
+  // Fonction pour vider toutes les tâches
+  function confirmerVider() {
+    if (confirm("Êtes-vous sûr de vouloir supprimer TOUTES les tâches ? Cette action est irréversible !")) {
+        fetch('/vider_evenements', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Toutes les tâches ont été supprimées !");
+                window.location.reload();  // Recharger la page pour mettre à jour la liste des événements
+            } else {
+                alert("❌ Erreur lors de la suppression !");
+            }
+        });
+    }
+}
+
+
+  function validateEvent(eventId) {
+      fetch(`/validate_event/${eventId}`, { method: 'POST' })
+          .then(response => response.json())
+          .then(data => {
+              if (data.message) {
+                  const eventElement = document.getElementById(`event-${eventId}`);
+                  if (eventElement) {
+                      eventElement.remove();
+                  }
+                  showFlashMessage("success", "✅ Tâche validée !");
+              } else {
+                  showFlashMessage("danger", "❌ Erreur lors de la validation de la tâche.");
+              }
+          })
+          .catch(error => {
+              showFlashMessage("danger", "❌ Erreur de connexion avec le serveur.");
+          });
+  }
+
+  // Afficher un message flash dynamique (top de la page)
+  function showFlashMessage(category, message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${category} alert-dismissible fade show mt-3`;
+      alertDiv.role = "alert";
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      const container = document.getElementById('js-flash-container') || document.body;
+      container.prepend(alertDiv);
+      setTimeout(() => {
+        alertDiv.classList.remove("show");
+        alertDiv.classList.add("hide");
+        setTimeout(() => alertDiv.remove(), 300);
+      }, 3000);
+  }
+</script>
+{% endblock %}

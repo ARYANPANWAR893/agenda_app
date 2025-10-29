@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>📁 Mes projets</h2>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if projets|length == 0 %}
+    <div class="alert alert-info mt-3">Aucun projet trouvé.</div>
+  {% else %}
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Échéance</th>
+        <th>Membres</th>
+        <th>Type</th>
+        <th>Actions</th>
+        <th>Fichier</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in projets %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.description or '' }}</td>
+        <td>{{ p.echeance or '' }}</td>
+        <td>
+          {% if p.members %}
+            {% for m in p.members %}
+              {{ m.username }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          {% else %}
+            {{ session['user'] }}
+          {% endif %}
+        </td>
+        <td>
+          {% if p.is_collaborative %}
+            <span class="badge bg-primary">Collaboratif</span>
+          {% else %}
+            <span class="badge bg-secondary">Personnel</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('supprimer_projet', project_id=p.id) }}" style="display:inline;" onsubmit="return confirm('Supprimer ce projet ? Cette action est irréversible !');">
+            <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+          </form>
+        </td>
+        <td>
+          {% if p.attachment %}
+            <a href="{{ url_for('static', filename='uploads/' ~ p.attachment) }}" target="_blank" class="btn btn-sm btn-info">
+              📎 Voir la pièce jointe
+            </a>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  {% endif %}
+
+  <a href="{{ url_for('ajouter_projet') }}" class="btn btn-success mt-3">➕ Nouveau projet</a>
+</div>
+{% endblock %}

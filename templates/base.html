@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Mon Agenda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/Favicon.png') }}">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+ :root {
+    --color-primary: #2563eb;
+    --color-gradient: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+    --color-secondary: #475569;
+    --color-accent: #0ea5e9;
+    --color-success: #059669;
+    --color-bg: #eef3fa;
+    --color-sidebar: rgba(255,255,255,0.54);
+    --color-sidebar-blur: blur(13px);
+    --color-shadow: 0 8px 32px 0 rgba(60, 120, 200, 0.13);
+    --color-card-bg: rgba(255,255,255,0.82);
+    --color-border: #e5e7eb;
+    --radius: 20px;
+    --transition: 0.18s cubic-bezier(.4,2,.5,1);
+    --glass-shadow: 0 6px 30px rgba(38, 99, 235, 0.11);
+}
+body {
+    background: var(--color-bg);
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+/* Style pour afficher les détails au survol */
+.task-details {
+        display: none;  /* Cacher les détails par défaut */
+        background-color: #f1f1f1;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        position: absolute;
+        z-index: 10;
+        width: 250px;
+        top: 50%;
+        left: 100%;
+        transform: translateX(10px) translateY(-50%);
+    }
+
+    /* Au survol de la tâche, afficher les détails */
+    .list-group-item:hover .task-details {
+        display: block;
+    }
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 56px;
+    background: #fff;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    z-index: 1050;
+}
+
+/* Style du logo dans la topbar */
+/* Style du logo dans la topbar */
+.topbar .logo-img {
+    height: 44px;
+    width: auto;
+    max-width: 160px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    object-fit: contain;
+    transition: height 0.25s ease;
+}
+
+/* Effet lumineux autour du logo en mode sombre avec intensité plus forte */
+body.dark-mode .topbar .logo-img {
+    filter: brightness(1.2) drop-shadow(0 0 20px rgba(255, 255, 255, 1)) drop-shadow(0 0 30px rgba(0, 204, 255, 0.8)); /* Lueur plus intense et prononcée */
+}
+
+
+
+
+.topbar .d-flex.align-items-center {
+    gap: 16px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+}
+
+.topbar .d-flex.align-items-center i {
+    font-size: 1.5rem;
+    color: #2563eb;
+}
+
+.topbar button#darkModeToggle {
+    border: 1.5px solid #2563eb;
+    background: transparent;
+    color: #2563eb;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.topbar button#darkModeToggle:hover {
+    background-color: #2563eb;
+    color: white;
+}
+
+.topbar a.btn-outline-light.btn-sm {
+    border: 1.5px solid #2563eb;
+    background: transparent;
+    color: #2563eb;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.topbar a.btn-outline-light.btn-sm:hover {
+    background-color: #2563eb;
+    color: white;
+}
+
+.sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 230px;
+    height: calc(100vh - 64px);
+    background: #fff;
+    color: #333;
+    padding-top: 24px;
+    border-right: 1px solid #e0e7ef;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s, box-shadow 0.3s;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+    margin-bottom: 8px;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background-color: #e0f7fa;
+    color: #00796b;
+    font-weight: 600;
+    border-left: 5px solid #00796b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar a i {
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+}
+
+.sidebar a:hover i {
+    transform: scale(1.1);
+}
+
+.sidebar .text-danger {
+    color: #d32f2f;
+}
+
+.sidebar .text-danger:hover {
+    background-color: #ffebee;
+}
+/* ----- Content ----- */
+.content {
+    margin-left: 250px;
+    padding: 100px 48px 48px 48px;
+    min-height: 100vh;
+    transition: margin-left var(--transition);
+}
+@media (max-width: 700px) {
+    .topbar .logo-img {
+        height: 38px;
+        max-width: 120px;
+    }
+}
+/* Flash message collant et animé */
+.flash-fixed {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    min-width: 330px;
+    max-width: 90vw;
+    opacity: 0.95;
+    box-shadow: 0 4px 32px #2563eb22;
+    animation: popIn 0.45s cubic-bezier(.6,2,.5,1);
+}
+@keyframes popIn {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.98);}
+  100% { opacity: 0.97; transform: translateX(-50%) translateY(0) scale(1);}
+}
+
+/* ----- Card, Table, Forms, Btn ----- */
+.card {
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--glass-shadow);
+    background: var(--color-card-bg);
+    transition: box-shadow var(--transition), transform var(--transition), background var(--transition);
+    backdrop-filter: blur(8px) saturate(120%);
+}
+.card:hover {
+    box-shadow: 0 12px 40px rgba(38, 99, 235, 0.16);
+    transform: translateY(-2px) scale(1.012);
+    background: rgba(255,255,255,0.95);
+}
+.card-header {
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-weight: 700;
+    font-size: 1.14rem;
+    letter-spacing: 0.3px;
+    background: linear-gradient(90deg, #2563eb12 0%, #0ea5e910 100%);
+}
+.btn, .form-control, .form-select {
+    border-radius: 12px !important;
+}
+.btn {
+    font-weight: 600;
+    font-size: 1.11rem;
+    padding: 10px 26px;
+    box-shadow: 0 2px 10px rgba(80,130,200,0.07);
+    transition: box-shadow var(--transition), transform var(--transition), background var(--transition);
+}
+.btn:active, .btn:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px #0ea5e955;
+}
+.btn-primary, .bg-primary {
+    background: linear-gradient(90deg, #2563eb 70%, #0ea5e9 100%) !important;
+    border: none !important;
+    color: #fff !important;
+}
+.btn-primary:hover {
+    background: linear-gradient(90deg, #1d4ed8 50%, #0ea5e9 100%) !important;
+}
+.btn-secondary, .bg-secondary {
+    background: var(--color-secondary) !important;
+    border: none !important;
+    color: #fff !important;
+}
+.btn-secondary:hover {
+    background: #334155 !important;
+}
+.btn-success, .bg-success {
+    background: linear-gradient(90deg, #059669 80%, #22d3ee 100%) !important;
+    border: none !important;
+}
+.btn-success:hover {
+    background: #047857 !important;
+}
+.btn-info, .bg-info {
+    background: var(--color-accent) !important;
+    border: none !important;
+    color: #111 !important;
+}
+.form-control, .form-select {
+    border: 1.4px solid var(--color-border);
+    background: #f8fafc;
+    font-size: 1.13rem;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2.5px #0ea5e935;
+}
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--glass-shadow);
+}
+.badge.bg-primary {
+    background: var(--color-primary) !important;
+}
+.badge.bg-secondary {
+    background: var(--color-secondary) !important;
+}
+.alert {
+    border-radius: 13px;
+    font-size: 1.08rem;
+    box-shadow: 0 2px 14px #22d3ee10;
+}
+/* Barre de scroll moderne */
+::-webkit-scrollbar {
+    width: 11px;
+    background: #e0e7ef;
+}
+::-webkit-scrollbar-thumb {
+    background: #bcd8fa;
+    border-radius: 9px;
+}
+.content-login {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+}
+/* Conteneur de la tâche */
+.task-item {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease; /* Transition fluide */
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Ombre douce */
+}
+
+/* Agrandissement de la tâche au survol */
+.task-item:hover {
+    transform: scale(1.1);  /* Effet de zoom */
+    z-index: 10;  /* Pour que l'élément agrandi soit au-dessus des autres éléments */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);  /* Ombre plus accentuée */
+}
+
+/* Détails de la tâche visibles au survol */
+.task-item:hover .task-details {
+    opacity: 1;  /* Les détails deviennent visibles */
+    transform: translateY(0);  /* Déplace les détails dans la vue */
+    visibility: visible;
+    transition: all 0.3s ease; /* Transition fluide */
+}
+
+/* Détails cachés par défaut */
+.task-details {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    opacity: 0;
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-20px); /* Positionner les détails un peu en haut par défaut */
+}
+
+/* Titre de la tâche */
+.task-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Description et autres détails */
+.task-details p {
+    margin: 5px 0;
+    font-size: 1rem;
+    color: #f0f0f0;
+}
+
+.task-details strong {
+    font-weight: 600;
+}
+
+body .content-login {
+    background: linear-gradient(135deg, #e3f0ff 0%, #b5d0ff 100%);
+}
+body.dark-mode .content-login {
+    background: linear-gradient(135deg, #191c24 0%, #23263a 100%);
+}
+
+body.dark-mode .content-login {
+    background: linear-gradient(135deg, #191c24 0%, #23263a 100%);
+}
+
+/* -------------------- DARK MODE FINAL & PRO -------------------- */
+body.dark-mode {
+    --color-primary: #22d3ee;
+    --color-gradient: linear-gradient(90deg, #1a1b25 0%, #212336 100%);
+    --color-secondary: #94a3b8;
+    --color-accent: #22d3ee;
+    --color-success: #10b981;
+    --color-danger: #ef4444;
+    --color-bg: #191c24;
+    --color-sidebar: #202232;
+    --color-sidebar-blur: blur(4px);
+    --color-shadow: 0 8px 32px 0 rgba(24, 26, 36, 0.55);
+    --color-card-bg: #23263a;
+    --color-border: #31344a;
+    color: #f3f4f6 !important;
+    background: var(--color-bg) !important;
+}
+body.dark-mode,
+body.dark-mode .content {
+    background: var(--color-bg) !important;
+    color: #f3f4f6 !important;
+}
+body.dark-mode .topbar {
+    background: var(--color-gradient) !important;
+    color: #f3f4f6 !important;
+    box-shadow: 0 2px 8px #0007;
+}
+body.dark-mode .sidebar {
+    background: var(--color-sidebar) !important;
+    color: #bcd0ee !important;
+}
+body.dark-mode .sidebar a {
+    color: #bcd0ee !important;
+}
+body.dark-mode .sidebar a:hover, body.dark-mode .sidebar a.active {
+    background: #282b43 !important;
+    color: var(--color-accent) !important;
+}
+/* Cartes, headers, list-group, etc. */
+body.dark-mode .card,
+body.dark-mode .card-header,
+body.dark-mode .card-body,
+body.dark-mode .list-group-item,
+body.dark-mode .list-group,
+body.dark-mode .modal-content {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-color: #31344a !important;
+}
+body.dark-mode .list-group-item {
+    background: #202232 !important;
+    color: #f3f4f6 !important;
+    border-color: #2a2e3f !important;
+}
+body.dark-mode .list-group-item.active,
+body.dark-mode .list-group-item:hover {
+    background: #282b43 !important;
+    color: #22d3ee !important;
+}
+body.dark-mode .list-group,
+body.dark-mode ul.list-group {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-radius: 15px !important;
+}
+body.dark-mode .card-header {
+    background: #202232 !important;
+    color: #fff !important;
+    border-bottom: 1.5px solid #31344a !important;
+}
+body.dark-mode h3,
+body.dark-mode h2,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode .fw-bold,
+body.dark-mode .card-title {
+    color: #fff !important;
+    text-shadow: 0 2px 10px #0004;
+}
+body.dark-mode .card input,
+body.dark-mode .card textarea {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-color: #31344a !important;
+}
+/* TABLES */
+body.dark-mode .table {
+    background: #23263a !important;
+}
+body.dark-mode .table th,
+body.dark-mode .table td {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-color: #31344a !important;
+}
+body.dark-mode .table thead th {
+    background: #212336 !important;
+    color: #22d3ee !important;
+    font-weight: 600;
+    border-bottom: 2px solid #31344a !important;
+}
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #202232 !important;
+}
+body.dark-mode .table-striped > tbody > tr:nth-of-type(even) {
+    background-color: #23263a !important;
+}
+body.dark-mode .table-hover > tbody > tr:hover {
+    background-color: #282b43 !important;
+}
+/* FullCalendar */
+body.dark-mode .fc {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-radius: 22px !important;
+    overflow: hidden;
+}
+body.dark-mode .fc-scrollgrid,
+body.dark-mode .fc-scrollgrid td,
+body.dark-mode .fc-scrollgrid th {
+    border-color: #293248 !important;
+}
+body.dark-mode .fc-col-header-cell {
+    background: #1a1b25 !important;
+    color: #22d3ee !important;
+    border-bottom: 2px solid #293248 !important;
+}
+body.dark-mode .fc-daygrid-day {
+    background: #202232 !important;
+    color: #c7d0dd !important;
+    border: 1px solid #293248 !important;
+    transition: background .15s;
+}
+body.dark-mode .fc-daygrid-day:hover {
+    background: #23263a !important;
+}
+body.dark-mode .fc-day-today {
+    background: #223344 !important;
+}
+body.dark-mode .fc-daygrid-day-number {
+    color: #22d3ee !important;
+    font-weight: 600;
+}
+body.dark-mode .fc .fc-toolbar-title,
+body.dark-mode .fc .fc-toolbar-chunk button,
+body.dark-mode .fc .fc-toolbar-chunk {
+    color: #f3f4f6 !important;
+}
+body.dark-mode .fc .fc-button,
+body.dark-mode .fc .fc-button-primary {
+    background: #212336 !important;
+    color: #f3f4f6 !important;
+    border: 1.5px solid #22d3ee !important;
+    border-radius: 12px;
+    transition: background .18s;
+}
+body.dark-mode .fc .fc-button-primary.fc-button-active,
+body.dark-mode .fc .fc-button-primary:hover {
+    background: #22d3ee !important;
+    color: #181c24 !important;
+    border: 1.5px solid #22d3ee !important;
+}
+/* --------- BOUTONS & INPUTS DARK --------- */
+body.dark-mode .btn, body.dark-mode .btn-outline-light,
+body.dark-mode button, body.dark-mode .button, 
+body.dark-mode input[type="button"], body.dark-mode input[type="submit"] {
+    background: #23263a !important;
+    color: #22d3ee !important;
+    border: 1.2px solid #22d3ee !important;
+    box-shadow: 0 1px 5px #0003;
+    font-weight: 600;
+    transition: background .16s, color .16s;
+}
+body.dark-mode .btn-primary, body.dark-mode .btn-primary:focus, body.dark-mode .btn-primary:active {
+    background: linear-gradient(90deg, #2563eb 80%, #22d3ee 100%) !important;
+    color: #fff !important;
+    border: none !important;
+}
+body.dark-mode .btn-success, body.dark-mode .btn-success:focus, body-dark-mode .btn-success:active {
+    background: linear-gradient(90deg, #10b981 80%, #22d3ee 100%) !important;
+    color: #fff !important;
+    border: none !important;
+}
+body.dark-mode .btn-danger, body.dark-mode .btn-danger:focus, body-dark-mode .btn-danger:active {
+    background: linear-gradient(90deg, #ef4444 80%, #b91c1c 100%) !important;
+    color: #fff !important;
+    border: none !important;
+}
+body.dark-mode .btn-outline-primary {
+    background: transparent !important;
+    color: #22d3ee !important;
+    border: 2px solid #22d3ee !important;
+}
+body.dark-mode .btn-outline-success {
+    background: transparent !important;
+    color: #10b981 !important;
+    border: 2px solid #10b981 !important;
+}
+body.dark-mode .btn-outline-danger {
+    background: transparent !important;
+    color: #ef4444 !important;
+    border: 2px solid #ef4444 !important;
+}
+body.dark-mode .btn-primary:hover {
+    background: linear-gradient(90deg, #1d4ed8 70%, #22d3ee 100%) !important;
+}
+body.dark-mode .btn-success:hover {
+    background: linear-gradient(90deg, #059669 80%, #10b981 100%) !important;
+}
+body.dark-mode .btn-danger:hover {
+    background: linear-gradient(90deg, #dc2626 80%, #ef4444 100%) !important;
+}
+
+/* --- Inputs & selects foncés partout --- */
+body.dark-mode .form-control,
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-color: #31344a !important;
+    box-shadow: none !important;
+}
+body.dark-mode .form-control:disabled, 
+body.dark-mode input:disabled, 
+body.dark-mode textarea:disabled, 
+body.dark-mode select:disabled,
+body.dark-mode .form-control[readonly], 
+body.dark-mode input[readonly], 
+body-dark-mode textarea[readonly], 
+body-dark-mode select[readonly] {
+    background: #23263a !important;
+    color: #8992a7 !important;
+    opacity: 0.7 !important;
+}
+body-dark-mode .form-control::placeholder,
+body-dark-mode input::placeholder,
+body-dark-mode textarea::placeholder {
+    color: #a2adc3 !important;
+    opacity: 1;
+}
+
+/* --- BOUTONS CLAIRS/FILTRES EN DARK MODE --- */
+body.dark-mode .btn-light, 
+body-dark-mode .btn-outline-light, 
+body-dark-mode .bg-light,
+body-dark-mode .btn-secondary,
+body-dark-mode .filter-btn, 
+body-dark-mode .filter-button,
+body-dark-mode button,
+body-dark-mode .btn {
+    background: #222532 !important;
+    color: #f3f4f6 !important;
+    border-color: #31344a !important;
+    font-weight: 600;
+    box-shadow: none !important;
+}
+body-dark-mode .btn-light:disabled, 
+body-dark-mode .btn-outline-light:disabled, 
+body-dark-mode .bg-light:disabled,
+body-dark-mode .btn-secondary:disabled,
+body-dark-mode .filter-btn:disabled, 
+body-dark-mode .filter-button:disabled {
+    background: #23263a !important;
+    color: #a2adc3 !important;
+    opacity: 0.7 !important;
+}
+body-dark-mode .btn-light.active,
+body-dark-mode .btn-outline-light.active,
+body-dark-mode .btn-secondary.active,
+body-dark-mode .filter-btn.active,
+body-dark-mode .filter-button.active,
+body-dark-mode .btn-light:focus,
+body-dark-mode .btn-outline-light:focus,
+body-dark-mode .btn-secondary:focus,
+body-dark-mode .filter-btn:focus,
+body-dark-mode .filter-button:focus,
+body-dark-mode .btn-light:hover,
+body-dark-mode .btn-outline-light:hover,
+body-dark-mode .btn-secondary:hover,
+body-dark-mode .filter-btn:hover,
+body-dark-mode .filter-button:hover {
+    background: #22d3ee !important;
+    color: #181c24 !important;
+    border-color: #22d3ee !important;
+}
+
+/* --- CHECKBOX ET RADIO EN DARK --- */
+body.dark-mode input[type="checkbox"],
+body.dark-mode input[type="radio"] {
+    accent-color: #22d3ee;
+    background: #23263a !important;
+    border: 1.6px solid #22d3ee !important;
+}
+/* --- CHAMPS DATES & SELECTS --- */
+body-dark-mode input[type="date"], 
+body-dark-mode input[type="time"], 
+body-dark-mode select {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-color: #31344a !important;
+}
+/* --- BADGES/FILTRES PETITS (COMME "11", "12") --- */
+body-dark-mode .badge,
+body-dark-mode .small-badge,
+body-dark-mode .count-badge {
+    background: #22d3ee !important;
+    color: #181c24 !important;
+    border-radius: 16px !important;
+    font-weight: 700;
+}
+/* --- FOCUS / SHADOW INPUTS EN DARK --- */
+body-dark-mode .form-control:focus,
+body-dark-mode input:focus,
+body-dark-mode textarea:focus,
+body-dark-mode select:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 2px #22d3ee66 !important;
+    border-color: #22d3ee !important;
+}
+/* --- Correction pour .bg-light utilisé dans tes petits tableaux --- */
+body-dark-mode .bg-light {
+    background: #222532 !important;
+    color: #f3f4f6 !important;
+}
+/* Alertes et modals */
+body.dark-mode .alert {
+    background: #282b43 !important;
+    color: #fff !important;
+    border-color: #22d3ee !important;
+}
+body.dark-mode .modal-content {
+    background: #23263a !important;
+    color: #f3f4f6 !important;
+    border-radius: 18px !important;
+    border: 1.5px solid #22d3ee !important;
+}
+body.dark-mode .topbar .logo-img {
+    filter: brightness(8) drop-shadow(0 0 7px #22d3ee88);
+}
+/* --- AUTH PAGES STYLE - "PRO" --- */
+.auth-center {
+  min-height: 100vh;
+  width: 100vw;
+  background: #f6f9fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-box {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 40px #8bb6f31a, 0 1.5px 6px #0001;
+  max-width: 400px;
+  width: 100%;
+  padding: 38px 32px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.auth-box-wide {
+  max-width: 850px;
+  flex-direction: row;
+  gap: 44px;
+  justify-content: center;
+  align-items: center;
+  padding: 46px 38px 38px 38px;
+}
+.auth-logo {
+  height: 54px;
+  margin-bottom: 16px;
+}
+.auth-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  text-align: center;
+  color: #183153;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.auth-desc {
+  text-align: center;
+  color: #3b4960;
+  font-size: 1.04rem;
+  margin-bottom: 20px;
+}
+.auth-box form {
+  width: 100%;
+}
+.auth-box label {
+  font-size: 1.01rem;
+  font-weight: 500;
+  color: #21304d;
+  margin-bottom: 3px;
+}
+.auth-box .form-control {
+  background: #f6f8fa;
+  border: 1.5px solid #d1d9e6;
+  border-radius: 7px;
+  margin-bottom: 15px;
+  font-size: 1.06rem;
+  padding: 10px 13px;
+  color: #1b2936;
+  transition: border-color 0.14s;
+}
+.auth-box .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1.5px #2563eb2e;
+}
+.auth-btn {
+  width: 100%;
+  background: #1976fa;
+  border-radius: 7px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.12rem;
+  padding: 11px 0;
+  margin-top: 6px;
+  margin-bottom: 5px;
+  border: none;
+  transition: background .18s;
+}
+.auth-btn:hover, .auth-btn:focus {
+  background: #1258bb;
+  color: #fff;
+}
+.auth-footer {
+  text-align: center;
+  font-size: 0.96rem;
+  color: #3e4760;
+  margin-top: 18px;
+}
+.auth-footer a {
+  color: #1976fa;
+  font-weight: 500;
+  text-decoration: underline;
+}
+.auth-footer a:hover {
+  color: #1258bb;
+}
+
+@media (max-width: 750px) {
+  .auth-box-wide {
+    flex-direction: column;
+    gap: 20px;
+    max-width: 97vw;
+    padding: 20px 7vw;
+  }
+}
+@media (max-width: 480px) {
+  .auth-box, .auth-box-wide { padding: 13px 3vw; }
+  .auth-title { font-size: 1.13rem;}
+}
+</style>
+</head>
+<body>
+    <div id="flash-messages" style="pointer-events: none;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} flash-fixed" role="alert">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </div>
+      
+    {% if not hide_navbar %}
+   <!-- Topbar -->
+<div class="topbar">
+    <div class="d-flex align-items-center">
+      <!-- Logo avec effet lumineux en mode sombre -->
+      <img src="{{ url_for('static', filename='img/Logo.png') }}" alt="Logo Agenda" class="logo-img">
+    </div>
+    
+    {% if session.get('user') %}
+    <div class="d-flex align-items-center">
+      <span class="me-3"><i class="bi bi-person-circle me-1"></i>{{ session['user'] }}</span>
+      <button id="darkModeToggle" class="btn btn-outline-light btn-sm me-2" title="Basculer mode sombre/clair">
+        <i id="darkModeIcon" class="bi bi-moon-fill"></i>
+      </button>
+      <a href="/logout" class="btn btn-outline-light btn-sm">Déconnexion</a>
+    </div>
+    {% endif %}
+  </div>
+  
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        {% if session.get('user') %}
+            <a href="{{ url_for('profil') }}" class="{% if request.path == url_for('profil') %}active{% endif %}">
+                <i class="bi bi-person-lines-fill"></i> Mon profil
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="{% if request.path == url_for('dashboard') %}active{% endif %}">
+                <i class="bi bi-bar-chart-fill"></i> Dashboard
+            </a>
+            {% if session.get('user') == 'Dir' %}
+            <a href="{{ url_for('affecter_tache') }}" class="{% if request.path == url_for('affecter_tache') %}active{% endif %}">
+                <i class="bi bi-person-check-fill"></i> Affecter une tâche
+            </a>
+        {% endif %}
+         
+            <a href="{{ url_for('ajouter_evenement') }}" class="{% if request.path == url_for('ajouter_evenement') %}active{% endif %}">
+                <i class="bi bi-plus-circle-fill"></i> Ajouter une tâche
+            </a>
+            
+            <a href="{{ url_for('evenements') }}" class="{% if request.path == url_for('evenements') %}active{% endif %}">
+                <i class="bi bi-calendar-event"></i> Tâches
+            </a>
+            <a href="{{ url_for('taches_affectees') }}" class="{% if request.path == url_for('taches_affectees') %}active{% endif %}">
+                <i class="bi bi-file-earmark-person"></i> Tâches Affectées
+            </a>
+            
+            {% if session.get('user') == 'Dir' %}
+    <!-- Si l'utilisateur est un directeur, afficher les deux calendriers -->
+    <a class="nav-link" href="#" id="calendarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-calendar2-range-fill me-2"></i> Calendrier
+        <!-- Ajouter une flèche vers le bas (caret) -->
+        <i class="bi bi-caret-down-fill ms-2"></i> <!-- Flèche ajoutée ici -->
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="calendarDropdown">
+        <li><a class="dropdown-item" href="{{ url_for('calendar_view') }}">Calendrier Global</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('calendar_personnel') }}">Calendrier Personnel</a></li>
+    </ul>
+{% else %}
+            <!-- Si l'utilisateur n'est pas un directeur, afficher seulement le calendrier personnel -->
+            <a class="nav-link" href="{{ url_for('calendar_personnel') }}">
+                <i class="bi bi-calendar2-range-fill me-2"></i> Calendrier Personnel
+            </a>
+        {% endif %}
+            <a href="{{ url_for('export_evenements_excel') }}" class="{% if request.path == url_for('export_evenements_excel') %}active{% endif %}">
+                <i class="bi bi-file-earmark-excel"></i> Exporter tâches
+            </a>
+            {% if session.get('user') == 'Dir' %}
+               
+                <a href="{{ url_for('historique_taches') }}" class="{% if request.path == url_for('historique_taches') %}active{% endif %}">
+                  <i class="bi bi-clock-history"></i> Historiques tâches
+              </a>
+                <a href="{{ url_for('liste_utilisateurs') }}" class="{% if request.path == url_for('liste_utilisateurs') %}active{% endif %}">
+                    <i class="bi bi-people"></i> Utilisateurs
+                </a>
+                <a href="{{ url_for('register') }}" class="{% if request.path == url_for('register') %}active{% endif %}">
+                    <i class="bi bi-person-plus-fill"></i> Créer un compte
+                </a>
+            {% endif %}
+        
+            <a href="{{ url_for('liste_projets') }}" class="{% if request.path == url_for('liste_projets') %}active{% endif %}">
+                <i class="bi bi-folder2-open"></i> Mes projets
+            </a>
+            <a href="{{ url_for('ajouter_projet') }}" class="{% if request.path == url_for('ajouter_projet') %}active{% endif %}">
+                <i class="bi bi-folder-plus"></i> Nouveau projet
+            </a>
+           
+        
+            <a href="/logout" class="text-danger">
+                <i class="bi bi-box-arrow-right"></i> Déconnexion
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="{% if request.path == url_for('login') %}active{% endif %}">
+                <i class="bi bi-box-arrow-in-right"></i> Connexion
+            </a>
+            {% if session.get('user') == 'Dir' %}
+                <a href="{{ url_for('register') }}" class="{% if request.path == url_for('register') %}active{% endif %}">
+                    <i class="bi bi-person-plus-fill"></i> Inscription
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Contenu principal -->
+    <div class="content{% if hide_navbar %} content-login{% endif %}">
+        {% block content %}{% endblock %}
+    </div>
+    
+    {% if session.get('user') %}
+    <!-- Toast Bootstrap notification (à coller juste avant </body>) -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="notifContainer" style="z-index:2100;">
+      <div id="eventToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body" id="eventToastMsg"></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+        </div>
+      </div>
+    </div>
+    <!-- Toast Bootstrap notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="notifContainer" style="z-index:2100;">
+        <div id="eventToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="eventToastMsg"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/events')
+        .then(res => res.json())
+        .then(events => {
+          let now = new Date();
+          let toasts = [];
+          events.forEach(ev => {
+            if (!ev.start) return;
+            let eventDate = new Date(ev.start.replace(' ', 'T'));
+            let diffMinutes = (eventDate - now) / 60000;
+            // Si la tâche commence dans moins de 5 minutes
+            if (diffMinutes > 0 && diffMinutes <= 5) {
+              // Message toast
+              let msg = `⏰ <b>Rappel :</b> la tâche <b>"${ev.title}"</b> commence à <b>${eventDate.toLocaleString()}</b>`;
+              toasts.push(msg);
+            }
+          });
+          // Affiche les toasts un par un
+          if (toasts.length > 0) {
+            let idx = 0;
+            function showNextToast() {
+              document.getElementById('eventToastMsg').innerHTML = toasts[idx];
+              let toast = new bootstrap.Toast(document.getElementById('eventToast'), {delay: 8000});
+              toast.show();
+              idx++;
+              if (idx < toasts.length) {
+                setTimeout(showNextToast, 8500);
+              }
+            }
+            showNextToast();
+          }
+        });
+    });
+    </script>
+    {% endif %}
+    <!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dark mode script -->
+    <script>
+        function updateDarkModeIcon() {
+            const icon = document.getElementById('darkModeIcon');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('bi-moon-fill');
+                icon.classList.add('bi-sun-fill');
+                icon.title = "Revenir au mode clair";
+            } else {
+                icon.classList.remove('bi-sun-fill');
+                icon.classList.add('bi-moon-fill');
+                icon.title = "Passer en mode sombre";
+            }
+        }
+    
+        // Applique le mode mémorisé au chargement
+        if (localStorage.getItem('darkMode') === 'on') {
+            document.body.classList.add('dark-mode');
+        }
+    
+        // Met à jour l’icône au démarrage
+        window.addEventListener('DOMContentLoaded', updateDarkModeIcon);
+    
+        // Toggle au clic
+        document.getElementById('darkModeToggle')?.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'on');
+            } else {
+                localStorage.setItem('darkMode', 'off');
+            }
+            updateDarkModeIcon();
+        });
+    
+        // Fonction pour jouer le son de la cloche d'école
+        function playSchoolBellSound() {
+            var audio = new Audio("{{ url_for('static', filename='sounds/school_bell.mp3') }}");
+            audio.play();  // Jouer le son
+        }
+    
+        // Fonction pour afficher un toast avec la sonnerie
+        function showToastWithSound(message) {
+            // Joue le son de la cloche d'école
+            playSchoolBellSound();
+    
+            // Crée et affiche le toast
+            var toast = new bootstrap.Toast(document.getElementById('eventToast'), { delay: 3000 });
+            document.getElementById('eventToastMsg').innerHTML = message;
+            toast.show();
+        }
+    
+        // Exemple d'appel pour tester
+        // Vous pouvez tester la fonction en l'appelant au moment que vous souhaitez
+        // Par exemple, au moment où une tâche se termine
+        // showToastWithSound("Tâche terminée !");
+    </script>
+        
+</body>
+</html>

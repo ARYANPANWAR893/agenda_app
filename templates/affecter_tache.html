@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Affecter une tâche</h2>
+    <form method="POST">
+      <div class="mb-3">
+          <label for="task_title" class="form-label">Titre de la tâche :</label>
+          <input type="text" name="task_title" class="form-control" required><br>
+      </div>
+  
+      <div class="mb-3">
+          <label for="task_description" class="form-label">Description :</label>
+          <textarea name="task_description" class="form-control" required></textarea><br>
+      </div>
+  
+      <div class="mb-3">
+          <label for="task_pole" class="form-label">Pôle :</label>
+          <select name="task_pole" id="task_pole" class="form-select" required>
+              {% for pole in poles %}
+                  <option value="{{ pole }}">{{ pole }}</option>
+              {% endfor %}
+          </select><br>
+      </div>
+  
+      <div class="mb-3">
+          <label for="task_date" class="form-label">Date de début :</label>
+          <input type="date" name="task_date" id="task_date" class="form-control" required><br>
+      </div>
+  
+      <div class="mb-3">
+          <label for="task_time" class="form-label">Heure de début :</label>
+          <input type="time" name="task_time" id="task_time" class="form-control" required><br>
+      </div>
+      <div class="mb-3">
+        <label for="eventPeriod" class="form-label">Période de la journée</label>
+        <select id="eventPeriod" name="period" class="form-select" required>
+            <option value="tôt">Tôt</option>
+            <option value="matin">Matin</option>
+            <option value="après-midi">Après-midi</option>
+            <option value="soir">Soir</option>
+        </select>
+    </div>
+      <div class="mb-3">
+          <label for="user_ids" class="form-label">Utilisateur(s) :</label>
+          <select name="user_ids" id="user_select" class="form-select" multiple required>
+              <!-- Les utilisateurs seront chargés dynamiquement en fonction du pôle -->
+          </select><br>
+      </div>
+      <div class="form-group">
+        
+        <input type="checkbox" id="repeatTask" name="repeatTask" class="form-check-input">
+        <label for="repeatTask">Répéter cette tâche tous les mois de l'année :</label>
+      </div><br>
+      <button type="submit" class="btn btn-success">Affecter la tâche</button>
+  </form>
+
+    <script>
+        // Filtrer les utilisateurs en fonction du pôle sélectionné
+        document.getElementById('task_pole').addEventListener('change', function() {
+            const selectedPole = this.value;
+            fetch(`/get_users_by_pole/${selectedPole}`)
+                .then(response => response.json())
+                .then(users => {
+                    const userSelect = document.querySelector('[name="user_ids"]');
+                    userSelect.innerHTML = ''; // Réinitialiser la liste des utilisateurs
+
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.username;
+                        userSelect.appendChild(option);
+                    });
+                })
+                .catch(err => console.log('Erreur lors du chargement des utilisateurs :', err));
+        });
+
+        // Appel initial pour charger les utilisateurs du pôle sélectionné par défaut
+        document.getElementById('task_pole').dispatchEvent(new Event('change'));
+    </script>
+{% endblock %}

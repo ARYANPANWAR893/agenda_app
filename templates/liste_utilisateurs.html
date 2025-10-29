@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Gestion des utilisateurs</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nom d'utilisateur</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in utilisateurs %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.role }}</td>
+                <td>
+                    <!-- Bouton supprimer -->
+                    <form method="POST" action="{{ url_for('supprimer_utilisateur', user_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Confirmer suppression ?');">
+                        <button class="btn btn-sm btn-danger" type="submit">Supprimer</button>
+                    </form>
+                    <!-- Bouton réinitialisation -->
+                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#resetModal" data-username="{{ u.username }}" data-userid="{{ u.id }}">
+                        Réinitialiser le mot de passe
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de réinitialisation mot de passe -->
+<div class="modal fade" id="resetModal" tabindex="-1" aria-labelledby="resetModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" method="POST" id="resetPasswordForm">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resetModalLabel">Réinitialiser le mot de passe</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label for="newPassword" class="form-label">Nouveau mot de passe pour <span id="resetUsername" style="color:#2563eb"></span> :</label>
+          <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="5">
+          <input type="hidden" id="resetUserId" name="user_id">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Réinitialiser</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+      </div>
+      
+    </form>
+
+
+  </div>
+</div>
+
+<script>
+  let resetModal = document.getElementById('resetModal');
+  resetModal.addEventListener('show.bs.modal', function (event) {
+    let button = event.relatedTarget;
+    let username = button.getAttribute('data-username');
+    let userid = button.getAttribute('data-userid');
+    document.getElementById('resetUsername').textContent = username;
+    document.getElementById('resetUserId').value = userid;
+  });
+  // Gestion du POST vers ta route Flask
+  document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let userId = document.getElementById('resetUserId').value;
+    let newPassword = document.getElementById('newPassword').value;
+    fetch('/reset_password/' + userId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ new_password: newPassword })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        // Ferme la modale, affiche un message, refresh (optionnel)
+        var modal = bootstrap.Modal.getInstance(resetModal);
+        modal.hide();
+        alert("✅ Mot de passe réinitialisé !");
+      } else {
+        alert("❌ Erreur : " + (data.error || "Echec de la réinitialisation."));
+      }
+    });
+  });
+  </script>
+  {% endblock %}

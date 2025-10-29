@@ -1,0 +1,220 @@
+{% set hide_navbar = True %}
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  /* Style pour le mode sombre */
+  body.dark-mode .auth-center {
+    background: linear-gradient(135deg, #1a1b25, #23263a) !important; /* Arrière-plan sombre */
+  }
+
+  body.dark-mode .auth-box {
+    background: #23263a !important; /* Fond de la boîte sombre */
+    color: #f3f4f6 !important; /* Texte clair pour le mode sombre */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important; /* Ombre plus forte pour le mode sombre */
+  }
+
+  body.dark-mode .auth-logo {
+    filter: brightness(0) drop-shadow(0 0 7px #22d3ee);  /* Le logo devient lumineux en mode sombre */
+  }
+
+  body.dark-mode .auth-title {
+    color: #fff !important; /* Titre en blanc */
+  }
+
+  body.dark-mode .auth-desc {
+    color: #b0b3b8 !important; /* Couleur des sous-titres en gris clair */
+  }
+
+  body.dark-mode .form-control {
+    background-color: #2a2e3f !important;  /* Fond sombre pour les champs */
+    color: #f3f4f6 !important;  /* Texte blanc dans les champs */
+    border: 1.5px solid #4a5568 !important;  /* Bordure douce */
+  }
+
+  body.dark-mode .form-control:focus {
+    border-color: #22d3ee !important;  /* Bordure lumineuse au focus */
+    box-shadow: 0 0 0 2px #22d3ee !important;  /* Ombre lumineuse au focus */
+  }
+
+  body.dark-mode .auth-btn {
+    background: linear-gradient(90deg, #22d3ee, #1a5eb8) !important;  /* Bouton lumineux */
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 0;
+    width: 100%;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  body.dark-mode .auth-btn:hover {
+    background: linear-gradient(90deg, #1d4ed8, #0ea5e9) !important; /* Changement de couleur au survol */
+  }
+
+  body.dark-mode .auth-footer {
+    color: #94a3b8 !important;  /* Texte du footer en gris clair */
+  }
+
+  body.dark-mode .auth-footer a {
+    color: #22d3ee !important;  /* Lien bleu clair */
+  }
+
+  body.dark-mode .auth-footer a:hover {
+    color: #1a5eb8 !important;  /* Lien bleu foncé au survol */
+  }
+
+  body.dark-mode .alert {
+    background-color: #2d3748 !important;
+    color: #fff !important;
+    border-color: #4a5568 !important;  /* Bordure claire pour les alertes */
+  }
+
+  body.dark-mode .auth-logo img {
+    filter: brightness(0) drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); /* Légère lueur autour du logo */
+  }
+
+  /* Labels en mode sombre */
+  body.dark-mode label {
+    color: #f3f4f6 !important; /* Texte des labels en blanc */
+  }
+/* Textes sous chaque champ en mode sombre (par exemple, les labels et placeholders) */
+body.dark-mode .auth-box label,
+body.dark-mode .form-control::placeholder {
+    color: #f3f4f6 !important; /* Texte blanc pour les labels et les placeholders */
+}
+
+/* Pour d'autres textes comme les descriptions sous les champs, vous pouvez également les cibler ainsi */
+body.dark-mode .auth-desc {
+    color: #f3f4f6 !important; /* Texte en blanc */
+}
+
+  /* Le reste des éléments restent inchangés pour le mode clair */
+
+  .auth-center {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .auth-box {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px 36px 36px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+  }
+  .auth-logo {
+    height: 60px;
+    margin-bottom: 24px;
+    object-fit: contain;
+  }
+  .auth-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #183153;
+  }
+  .auth-desc {
+    font-size: 1rem;
+    color: #475569;
+    margin-bottom: 28px;
+    line-height: 1.4;
+  }
+  form label {
+    font-weight: 600;
+    color: #2563eb;
+    display: block;
+    margin-bottom: 6px;
+    text-align: left;
+  }
+  .form-control {
+    border-radius: 8px !important;
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1.5px solid #cbd5e1;
+    transition: border-color 0.3s ease;
+  }
+  .form-control:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+    outline: none;
+  }
+  .input-group-text {
+    background: #eef2ff !important;
+    border-radius: 8px 0 0 8px !important;
+    color: #2563eb;
+    font-weight: 700;
+  }
+  .auth-btn {
+    background: linear-gradient(90deg, #2563eb, #0ea5e9);
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 0;
+    width: 100%;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .auth-btn:hover {
+    background: linear-gradient(90deg, #1d4ed8, #0ea5e9);
+  }
+  .alert {
+    font-size: 0.9rem;
+  }
+  .auth-footer {
+    font-size: 0.87rem;
+    color: #94a3b8;
+    margin-top: 32px;
+  }
+  .auth-footer a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .auth-footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+<div class="auth-center">
+  <div class="auth-box">
+    <img src="{{ url_for('static', filename='img/Logo2.png') }}" alt="Logo" class="auth-logo">
+    <div class="auth-title">Connectez-vous</div>
+    <div class="auth-desc">
+      Entrez votre nom d’utilisateur et votre mot de passe<br>pour vous connecter
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mt-1 mb-2">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/login" novalidate>
+      <label for="username">Nom d'utilisateur</label>
+      <div class="input-group mb-3">
+        <span class="input-group-text">@</span>
+        <input type="text" class="form-control" id="username" name="username" required autocomplete="username" placeholder="Votre nom d'utilisateur">
+      </div>
+
+      <label for="password">Mot de passe</label>
+      <input type="password" class="form-control mb-3" id="password" name="password" required autocomplete="current-password" placeholder="Votre mot de passe">
+
+      <button type="submit" class="auth-btn">Entrer</button>
+    </form>
+
+   
+  </div>
+</div>
+{% endblock %}

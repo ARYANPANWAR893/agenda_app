@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="card shadow-lg border-0 mb-4" style="border-radius: 20px;">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold" style="color: #333;">🗓️ Mon Calendrier Personnel</h3>
+      </div>
+      <div id="calendar" style="border-radius: 20px; background-color: #f9f9f9; box-shadow: 0 2px 20px rgba(0,0,0,0.15);"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const eventsData = {{ events | tojson }};  // Passer les événements à FullCalendar
+
+  const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    locale: 'fr',
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    events: eventsData,  // Passer les événements récupérés par Flask
+    eventDisplay: 'block',
+    dayMaxEvents: true,
+    eventDidMount: function(info) {
+      let classe = info.event.extendedProps.classe;
+      let color = '#64748b'; // gris par défaut
+      if (classe === 'Direction') color = '#2563eb';           // bleu
+      else if (classe === 'Pôle Compta') color = '#059669';   // vert
+      else if (classe === 'Pôle Social') color = '#eab308';   // jaune
+      else if (classe === 'Pôle juridique') color = '#ef4444';// rouge
+      else if (classe === 'Pôle Communication') color = '#0dcaf0'; // cyan clair
+      else if (classe && classe.startsWith('Assistance')) color = '#6c757d';  // gris
+      info.el.style.backgroundColor = color;
+      info.el.style.color = '#fff';
+      info.el.style.borderRadius = '10px';
+      info.el.style.padding = '5px 10px';
+      info.el.style.fontWeight = 'bold';
+      info.el.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    },
+    editable: false,
+    selectable: false,
+  });
+
+  calendar.render();
+  
+});
+
+</script>
+{% endblock %}

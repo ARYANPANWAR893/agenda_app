@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<head>
+  <style>
+    /* Style pour les tâches validées */
+    .task-detail.validée {
+            text-decoration: line-through; /* Barrer la tâche */
+            color: #6c757d;  /* Griser le texte */
+        }
+  /* Conteneur des boutons */
+.button-group {
+    display: flex;  /* Utiliser Flexbox pour aligner les boutons sur la même ligne */
+    justify-content: flex-start;  /* Aligner les boutons à gauche */
+    gap: 10px;  /* Espacement de 10px entre les boutons */
+    margin-top: 20px;  /* Espacement supérieur */
+}
+
+/* Style commun pour les boutons */
+.button-group .btn {
+    border-radius: 5px;  /* Coins arrondis */
+    padding: 8px 16px;  /* Espacement interne des boutons */
+    font-weight: bold;  /* Texte en gras */
+    transition: all 0.3s ease;  /* Ajout d'une transition douce pour l'effet hover */
+}
+
+/* Bouton "Modifier" (bleu avec texte blanc) */
+.button-group .btn-outline-primary {
+    color: white;  /* Texte blanc pour "Modifier" */
+    background-color: #007bff;  /* Bleu pour "Modifier" */
+    border: 1px solid #007bff;
+}
+
+/* Effet hover sur le bouton "Modifier" */
+.button-group .btn-outline-primary:hover {
+    color: #007bff;  /* Texte bleu pour "Modifier" au survol */
+    background-color: white;  /* Fond blanc pour "Modifier" au survol */
+    border: 1px solid #007bff;  /* Bordure bleue pour "Modifier" */
+}
+
+/* Bouton "Supprimer" (rouge avec texte blanc) */
+.button-group .btn-danger {
+    color: white;  /* Texte en blanc pour "Supprimer" */
+    background-color: #dc3545;  /* Couleur rouge pour "Supprimer" */
+    border: 1px solid #dc3545;
+}
+
+/* Effet hover sur le bouton "Supprimer" */
+.button-group .btn-danger:hover {
+    color: #dc3545;  /* Texte rouge pour "Supprimer" au survol */
+    background-color: white;  /* Fond blanc pour "Supprimer" au survol */
+    border: 1px solid #dc3545;  /* Bordure rouge pour "Supprimer" */
+}
+
+/* Bouton "Reporter" (jaune avec texte blanc) */
+.button-group .btn-outline-warning {
+    color: white;  /* Texte blanc pour "Reporter" */
+    background-color: #ffc107;  /* Jaune pour "Reporter" */
+    border: 1px solid #ffc107;
+}
+
+/* Effet hover sur le bouton "Reporter" */
+.button-group .btn-outline-warning:hover {
+    color: #ffc107;  /* Texte jaune pour "Reporter" au survol */
+    background-color: white;  /* Fond blanc pour "Reporter" au survol */
+    border: 1px solid #ffc107;  /* Bordure jaune pour "Reporter" */
+}
+
+/* Style pour les tâches validées */
+.task-detail {
+        position: relative; /* Nécessaire pour positionner les rayures correctement */
+    }
+
+    .task-detail.validée {
+        text-decoration: line-through; /* Barrer la tâche */
+        color: #6c757d;  /* Griser le texte */
+    }
+
+    /* Ajouter des rayures diagonales sur l'ensemble de la tâche validée */
+    .task-detail.validée::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1) 75%, transparent 75%, transparent);
+        background-size: 10px 10px; /* Taille des rayures */
+        pointer-events: none;  /* S'assurer que cela ne gêne pas l'interaction */
+        z-index: -1; /* Placer derrière le texte pour ne pas interférer avec l'interaction */
+    }
+  </style>
+</head>
+
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-secondary text-white">
+        📝 Détails de la tâche : {{ event.title }}
+      </div>
+      <div class="card-body task-detail {% if event.statut == 'validé' %}validée{% endif %}">  <!-- Appliquer la classe validée -->
+        <h5>Title: {{ event.title }}</h5>
+        <p><strong>Description :</strong> {{ event.description }}</p>
+        <p><strong>Classe :</strong> {{ event.classe }}</p>
+        <p><strong>Date et Heure :</strong> {{ event.start }}</p>
+        <p><strong>Priorité :</strong> {{ event.priorite }}</p> <!-- Priorité -->
+        <p><strong>Statut :</strong> {{ event.statut }}</p> <!-- Statut -->
+
+        <ul>
+            {% for user in users %}
+                <li>{{ user }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Conteneur pour les boutons -->
+        <div class="button-group">
+          <!-- Bouton Modifier -->
+          <a href="{{ url_for('modifier_event', event_id=event.id) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+
+          <!-- Formulaire pour Supprimer -->
+          <form method="POST" action="{{ url_for('supprimer_event', event_id=event.id) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
+              <button type="submit" class="btn btn-sm btn-danger">Supprimer</button>
+          </form>
+
+          <!-- Formulaire pour Reporter -->
+          <form method="POST" action="{{ url_for('reporter_event', event_id=event.id) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir reporter cette tâche ?');">
+              <button type="submit" class="btn btn-sm btn-outline-warning">Reporter</button>
+          </form>
+
+          <!-- Formulaire pour Valider -->
+          {% if event.statut != 'validé' %}
+          <form method="POST" action="{{ url_for('valider_event', event_id=event.id) }}">
+              <button type="submit" class="btn btn-success">Valider la tâche</button>
+          </form>
+          {% else %}
+          <button class="btn btn-success" disabled>Cette tâche est déjà validée</button>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

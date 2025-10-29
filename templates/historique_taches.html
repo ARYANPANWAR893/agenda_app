@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-primary text-white">Historique des tâches</div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                    
+                    {% if session.get('user') == 'Dir' %}
+                        <!-- Formulaire pour confirmer la suppression -->
+                        <form method="POST" action="{{ url_for('vider_historique') }}" id="confirmation-form">
+                            <!-- Bouton pour afficher le champ de confirmation -->
+                            <button type="button" id="show-confirmation" class="btn btn-danger mb-3">Vider l'historique des tâches</button>
+
+                            <!-- Champ de confirmation caché initialement -->
+                            <div id="confirmation-container" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="confirmation_code" class="form-label">Entrez le code de confirmation :</label>
+                                    <input type="text" id="confirmation_code" name="confirmation_code" class="form-control" required>
+                                    <small class="text-muted">Entrez "Dir123" pour confirmer.</small>
+                                </div>
+                                <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                            </div>
+                        </form>
+                        <!-- Formulaire de filtres -->
+<form method="get" action="{{ url_for('historique_taches') }}">
+    <div class="row mb-3">
+        <div class="col">
+            <label for="pole">Pôle</label>
+            <select class="form-control" id="pole" name="pole">
+                <option value="">Choisir un pôle</option>
+                <option value="Pôle Compta" {% if filter_pole == "Pôle Compta" %}selected{% endif %}>Pôle Compta</option>
+                <option value="Pôle Social" {% if filter_pole == "Pôle Social" %}selected{% endif %}>Pôle Social</option>
+                <option value="Pôle juridique" {% if filter_pole == "Pôle juridique" %}selected{% endif %}>Pôle juridique</option>
+                <option value="Pôle Communication" {% if filter_pole == "Pôle Communication" %}selected{% endif %}>Pôle Communication</option>
+                <option value="Direction" {% if filter_pole == "Direction" %}selected{% endif %}>Direction</option>
+                <option value="Assistance Compta" {% if filter_pole == "Assistance Compta" %}selected{% endif %}>Assistance Compta</option>
+                <option value="Assistance Paie" {% if filter_pole == "Assistance Paie" %}selected{% endif %}>Assistance Paie</option>
+                <option value="Assistance Communication" {% if filter_pole == "Assistance Communication" %}selected{% endif %}>Assistance Communication</option>
+            </select>
+        </div>
+        <div class="col">
+            <label for="priorite">Priorité</label>
+            <select class="form-control" id="priorite" name="priorite">
+                <option value="">Choisir une priorité</option>
+                <option value="Haute" {% if filter_priorite == "Haute" %}selected{% endif %}>Haute</option>
+                <option value="Moyenne" {% if filter_priorite == "Moyenne" %}selected{% endif %}>Moyenne</option>
+                <option value="Basse" {% if filter_priorite == "Basse" %}selected{% endif %}>Basse</option>
+            </select>
+        </div>
+        <div class="col">
+            <label for="date">Date</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ filter_date }}">
+        </div>
+        <div class="col">
+            <label for="heure">Heure</label>
+            <input type="time" class="form-control" id="heure" name="heure" value="{{ filter_heure }}">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Filtrer</button>
+    
+</form>
+
+                    {% endif %}
+                    <br>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Événement</th>
+                                <th>Action</th>
+                                <th>Utilisateur</th>
+                                <th>Timestamp</th>
+                                <th>Détails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td>{{ log.event_id }}</td>
+                                <td>{{ log.action }}</td>
+                                <td>{{ log.action_user }}</td>
+                                <td>{{ log.timestamp }}</td>
+                                <td>{{ log.details }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Lorsque le bouton "Vider l'historique" est cliqué, afficher le champ de confirmation
+    document.getElementById('show-confirmation').addEventListener('click', function() {
+        document.getElementById('confirmation-container').style.display = 'block';
+        document.getElementById('show-confirmation').style.display = 'none'; // Cacher le bouton
+    });
+</script>
+{% endblock %}

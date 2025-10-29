@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow
+        {% if event.classe == 'Direction' %} border-primary
+        {% elif event.classe == 'Pôle Compta' %} border-success
+        {% elif event.classe == 'Pôle Social' %} border-warning
+        {% elif event.classe == 'Pôle juridique' %} border-danger
+        {% elif event.classe == 'Pôle Communication' %} border-info
+        {% elif event.classe.startswith('Assistance') %} border-secondary
+        {% else %} border-primary
+        {% endif %}">
+        <div class="card-header text-white
+          {% if event.classe == 'Direction' %}bg-primary
+          {% elif event.classe == 'Pôle Compta' %}bg-success
+          {% elif event.classe == 'Pôle Social' %}bg-warning text-dark
+          {% elif event.classe == 'Pôle juridique' %}bg-danger
+          {% elif event.classe == 'Pôle Communication' %}bg-info
+          {% elif event.classe.startswith('Assistance') %}bg-secondary
+          {% else %}bg-primary
+          {% endif %}">
+          Modifier la tâche
+          {% if event.classe %}
+            <span class="badge ms-2
+              {% if event.classe == 'Direction' %}bg-light text-primary
+              {% elif event.classe == 'Pôle Compta' %}bg-light text-success
+              {% elif event.classe == 'Pôle Social' %}bg-light text-warning
+              {% elif event.classe == 'Pôle juridique' %}bg-light text-danger
+              {% elif event.classe == 'Pôle Communication' %}bg-light text-info
+              {% elif event.classe.startswith('Assistance') %}bg-light text-secondary
+              {% else %}bg-secondary
+              {% endif %}">
+              {{ event.classe }}
+            </span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+
+          <!-- Formulaire de modification -->
+          <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label class="form-label">Titre</label>
+              <input type="text" class="form-control" name="title" value="{{ event.title }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description">{{ event.description }}</textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Date & Heure</label>
+              <input type="datetime-local" class="form-control" name="start" value="{{ event.start[:16]|replace(' ', 'T') }}" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Classe</label>
+              <select class="form-select" name="classe" required>
+                <option value="">-- Sélectionner un pôle --</option>
+                <option value="Direction" {% if event.classe == 'Direction' %}selected{% endif %}>Direction</option>
+                <option value="Pôle Compta" {% if event.classe == 'Pôle Compta' %}selected{% endif %}>Pôle Compta</option>
+                <option value="Pôle Social" {% if event.classe == 'Pôle Social' %}selected{% endif %}>Pôle Social</option>
+                <option value="Pôle juridique" {% if event.classe == 'Pôle juridique' %}selected{% endif %}>Pôle juridique</option>
+                <option value="Pôle Communication" {% if event.classe == 'Pôle Communication' %}selected{% endif %}>Pôle Communication</option>
+                <option value="Assistance Compta" {% if event.classe == 'Assistance Compta' %}selected{% endif %}>Assistance Compta</option>
+                <option value="Assistance Paie" {% if event.classe == 'Assistance Paie' %}selected{% endif %}>Assistance Paie</option>
+                <option value="Assistance juridique" {% if event.classe == 'Assistance juridique' %}selected{% endif %}>Assistance juridique</option>
+                <option value="Assistance Communication" {% if event.classe == 'Assistance Communication' %}selected{% endif %}>Assistance Communication</option>
+              </select>
+            </div>
+           
+            <div class="mb-3">
+              <label class="form-label">Priorité</label>
+              <select class="form-select" name="priorite">
+                <option value="Basse" {% if event.priorite == 'Basse' %}selected{% endif %}>Basse</option>
+                <option value="Moyenne" {% if event.priorite == 'Moyenne' or not event.priorite %}selected{% endif %}>Moyenne</option>
+                <option value="Haute" {% if event.priorite == 'Haute' %}selected{% endif %}>Haute</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Statut</label>
+              <select class="form-select" name="statut" required>
+                <option value="à faire" {% if event.statut == "à faire" %}selected{% endif %}>À faire</option>
+                <option value="en cours" {% if event.statut == "en cours" %}selected{% endif %}>En cours</option>
+                <option value="terminé" {% if event.statut == "terminé" %}selected{% endif %}>Terminé</option>
+                <option value="validé" {% if event.statut == "validé" %}selected{% endif %}>Validé</option>
+              </select>
+            </div>
+            <!-- Champ fichier + affichage pièce jointe existante -->
+            <div class="mb-3">
+              <label class="form-label">Changer / Ajouter une pièce jointe (PDF, image...)</label>
+              <input type="file" class="form-control" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.gif,.bmp">
+              {% if event.attachment %}
+                <div class="mt-2">
+                  <a href="{{ url_for('static', filename='uploads/' ~ event.attachment) }}" target="_blank" class="btn btn-sm btn-info">
+                    📎 Voir la pièce jointe actuelle
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="apply_to_all" name="apply_to_all">
+              <label class="form-check-label" for="apply_to_all">Appliquer cette modification à tous les événements récurrents</label>
+            </div><br>
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{{ url_for('evenements') }}" class="btn btn-secondary ms-2">Annuler</a>
+          </form>
+          <!-- Fin formulaire modification -->
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

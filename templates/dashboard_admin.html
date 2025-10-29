@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center text-primary"></h2>
+
+  <!-- Section des utilisateurs par pôle avec le nombre de tâches -->
+  <div class="row">
+    <div class="col-md-12">
+      <h5 class="text-info mb-3">Utilisateurs par pôle :</h5>
+      
+      <!-- Tableau des utilisateurs avec effet moderne -->
+      <div class="card shadow-lg rounded-lg mb-4">
+        <div class="card-body">
+          <table class="table table-hover table-striped" id="usersTable">
+            <thead class="bg-primary text-white">
+              <tr>
+                <th>Pôle</th>
+                <th>Nom d'utilisateur</th>
+                <th>Nombre de tâches créées</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in users_by_pole %}
+                <tr>
+                  <!-- Coloration des cellules de la colonne "Pôle" -->
+                  <td style="background-color: 
+                      {% if row.role == 'Direction' %} #81d4fa;
+                      {% elif row.role == 'Pôle Compta' %} #64b5f6;
+                      {% elif row.role == 'Pôle Social' %} #81c784;
+                      {% elif row.role == 'Pôle juridique' %} #e57373;
+                      {% elif row.role == 'Pôle Communication' %} #b39ddb;
+                      {% elif row.role == 'Assistance Compta' %} #aed581;
+                      {% elif row.role == 'Assistance Paie' %} #ffcc80;
+                      {% elif row.role == 'Assistance juridique' %} #f8bbd0;
+                      {% elif row.role == 'Assistance Communication' %} #f48fb1;
+                      {% else %} #f1f8e6; {% endif %}">
+                      {{ row.role }}
+                  </td>
+
+                  <!-- Coloration des cellules de la colonne "Nom d'utilisateur" -->
+                  <td style="background-color: 
+                      {% if row.role == 'Direction' %} #81d4fa;
+                      {% elif row.role == 'Pôle Compta' %} #64b5f6;
+                      {% elif row.role == 'Pôle Social' %} #81c784;
+                      {% elif row.role == 'Pôle juridique' %} #e57373;
+                      {% elif row.role == 'Pôle Communication' %} #b39ddb;
+                      {% elif row.role == 'Assistance Compta' %} #aed581;
+                      {% elif row.role == 'Assistance Paie' %} #ffcc80;
+                      {% elif row.role == 'Assistance juridique' %} #f8bbd0;
+                      {% elif row.role == 'Assistance Communication' %} #f48fb1;
+                      {% else %} #f1f8e6; {% endif %}">
+                      {{ row.username }}
+                  </td>
+
+                  <!-- Coloration des cellules de la colonne "Nombre de tâches créées" -->
+                  <td style="background-color: 
+                      {% if row.task_count > 5 %} #4caf50;  <!-- Vert si plus de 5 tâches -->
+                      {% elif row.task_count > 0 %} #ffeb3b;  <!-- Jaune si entre 1 et 5 tâches -->
+                      {% else %} #f44336;  <!-- Rouge si 0 tâches -->
+                      {% endif %}">
+                      {{ row.task_count }}
+                  </td> 
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section de la répartition des tâches par statut -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h5 class="text-info mb-3">Répartition des tâches par statut :</h5>
+      <div class="card shadow-lg rounded-lg">
+        <div class="card-body">
+          <ul class="list-group">
+            {% for row in statuts_stats %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="d-flex align-items-center">
+                  {% if row.statut == "à faire" %}🟠{% elif row.statut == "en cours" %}🟡{% elif row.statut == "terminé" %}🟢{% elif row.statut == "validé" %}✅{% else %}🔘{% endif %}
+                  <b class="ms-2">{{ row.statut|capitalize }}</b>
+                </span>
+                <span class="badge bg-primary rounded-pill">{{ row.nb }}</span>
+              </li>
+            {% else %}
+              <li class="list-group-item text-muted">Aucune tâche</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <form id="filterForm" class="mb-4" method="GET" action="{{ url_for('dashboard_admin') }}">
+    <div class="row">
+      <div class="col-md-3">
+        <label for="filterDate">Date :</label>
+        <input type="date" class="form-control" id="filterDate" name="date" value="{{ request.args.get('date', '') }}">
+      </div>
+      <div class="col-md-3">
+        <label for="filterTime">Heure :</label>
+        <input type="time" class="form-control" id="filterTime" name="time" value="{{ request.args.get('time', '') }}">
+      </div>
+      <div class="col-md-3">
+        <label for="filterPole">Pôle :</label>
+        <select class="form-control" id="filterPole" name="pole">
+          <option value="">Tous les pôles</option>
+          <option value="Direction" {% if request.args.get('pole') == 'Direction' %}selected{% endif %}>Direction</option>
+          <option value="Pôle Compta" {% if request.args.get('pole') == 'Pôle Compta' %}selected{% endif %}>Pôle Compta</option>
+          <option value="Pôle Social" {% if request.args.get('pole') == 'Pôle Social' %}selected{% endif %}>Pôle Social</option>
+          <option value="Pôle juridique" {% if request.args.get('pole') == 'Pôle juridique' %}selected{% endif %}>Pôle juridique</option>
+          <option value="Pôle Communication" {% if request.args.get('pole') == 'Pôle Communication' %}selected{% endif %}>Pôle Communication</option>
+          <option value="Assistance Compta" {% if request.args.get('pole') == 'Assistance Compta' %}selected{% endif %}>Assistance Compta</option>
+          <option value="Assistance Paie" {% if request.args.get('pole') == 'Assistance Paie' %}selected{% endif %}>Assistance Paie</option>
+          <option value="Assistance Communication" {% if request.args.get('pole') == 'Assistance Communication' %}selected{% endif %}>Assistance Communication</option>
+          <option value="Assistance juridique" {% if request.args.get('pole') == 'Assistance juridique' %}selected{% endif %}>Assistance juridique</option>
+
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label>&nbsp;</label>
+        <button type="submit" class="btn btn-primary form-control">Appliquer</button>
+      </div>
+    </div>
+  </form>
+  
+  <!-- Liste des tâches -->
+  <h5 class="mt-4 text-info">Toutes les tâches (tous utilisateurs) :</h5>
+  <div class="card shadow-lg rounded-lg mb-4">
+    <div class="card-body">
+      <table class="table table-bordered table-hover" id="eventsTable">
+        <thead class="bg-primary text-white">
+          <tr>
+            <th>Titre</th>
+            <th>Date</th>
+            <th>Classe</th>
+            <th>Projet</th>
+            <th>Priorité</th>
+            <th>Statut</th>
+            <th>Utilisateur</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in events %}
+          <tr>
+            <td>{{ ev.title }}</td>
+            <td>{{ ev.start }}</td>
+            <td>
+              {% if ev.classe == 'Direction' %}
+                <span class="badge bg-primary">Direction</span>
+              {% elif ev.classe == 'Pôle Compta' %}
+                <span class="badge bg-success">Pôle Compta</span>
+              {% elif ev.classe == 'Pôle Social' %}
+                <span class="badge bg-warning text-dark">Pôle Social</span>
+              {% elif ev.classe == 'Pôle juridique' %}
+                <span class="badge bg-danger">Pôle juridique</span>
+              {% elif ev.classe == 'Pôle Communication' %}
+                <span class="badge bg-info">Pôle Communication</span>
+              {% elif ev.classe.startswith('Assistance') %}
+                <span class="badge bg-secondary">{{ ev.classe }}</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ ev.classe }}</span>
+              {% endif %}
+            </td>
+            <td>{{ ev.projet or '' }}</td>
+            <td>{{ ev.priorite or 'Moyenne' }}</td>
+            <td>
+              {% if ev.statut == "à faire" %}🟠{% elif ev.statut == "en cours" %}🟡{% elif ev.statut == "terminé" %}🟢{% elif ev.statut == "validé" %}✅{% else %}🔘{% endif %}
+              {{ ev.statut|capitalize }}
+            </td>
+            <td>{{ ev.username }}</td>
+            <td>{{ ev.description }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+<!-- jQuery et DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<!-- Init DataTables avec Scroll -->
+<script>
+  $(document).ready(function() {
+    let table = $('#eventsTable').DataTable({
+  "scrollY": "400px", // Hauteur du tableau avec un scrolling vertical
+  "scrollCollapse": true, // Permet au tableau de se réduire si moins de données
+  "paging": true, // Pagination activée
+  "lengthChange": false, // Désactive le changement du nombre de lignes affichées
+  "language": {
+    "search": "Rechercher :",
+    "info": "Affichage _START_ à _END_ sur _TOTAL_ lignes",
+    "paginate": {"next": "Suivant", "previous": "Précédent"}
+  }
+});
+
+
+    $('#filterForm input, #filterForm select').on('input change', function() {
+      let projet = $('#filtreProjet').val().toLowerCase();
+      let statut = $('#filtreStatut').val();
+      let priorite = $('#filtrePriorite').val();
+      let dateDebut = $('#filtreDateDebut').val();
+      let dateFin = $('#filtreDateFin').val();
+
+      table.rows().every(function() {
+        let data = this.data();
+        let show = true;
+        if (projet && data[3].toLowerCase().indexOf(projet) === -1) show = false;
+        let statusCell = data[5].replace(/[🟠🟡🟢✅🔘]/g, '').trim();
+        if (statut && statusCell !== statut) show = false;
+        if (priorite && data[4].trim() !== priorite) show = false;
+        let rowDate = data[1].slice(0,10);
+        if (dateDebut && rowDate < dateDebut) show = false;
+        if (dateFin && rowDate > dateFin) show = false;
+
+        if (show) $(this.node()).show(); else $(this.node()).hide();
+      });
+    });
+  });
+</script>
+
+{% endblock %}

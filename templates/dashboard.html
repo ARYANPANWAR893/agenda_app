@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">📅 Tâches par jour (ce mois)</h5>
+          <canvas id="monthlyChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="card-title">📈 Tâches par mois (cette année)</h5>
+          <canvas id="yearlyChart" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('/events')
+    .then(res => res.json())
+    .then(events => {
+      const now = new Date();
+
+      // Données pour le mois
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      let monthlyLabels = [], dailyCounts = Array(daysInMonth).fill(0);
+      for (let i = 1; i <= daysInMonth; i++) {
+        monthlyLabels.push(i.toString().padStart(2, '0'));
+      }
+
+      // Données pour l'année
+      const yearlyLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+      let monthlyTotals = Array(12).fill(0);
+
+      events.forEach(event => {
+        const date = new Date(event.start);
+        const month = date.getMonth();
+        const day = date.getDate();
+        if (date.getFullYear() === now.getFullYear()) {
+          monthlyTotals[month]++;
+          if (month === now.getMonth()) {
+            dailyCounts[day - 1]++;
+          }
+        }
+      });
+
+      new Chart(document.getElementById('monthlyChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: monthlyLabels,
+          datasets: [{
+            label: 'Tâches par jour',
+            data: dailyCounts,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'Jour' } },
+            y: { beginAtZero: true, title: { display: true, text: 'Tâches' } }
+          }
+        }
+      });
+
+      new Chart(document.getElementById('yearlyChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: yearlyLabels,
+          datasets: [{
+            label: 'Tâches par mois',
+            data: monthlyTotals,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'Mois' } },
+            y: { beginAtZero: true, title: { display: true, text: 'Tâches' } }
+          }
+        }
+      });
+    });
+});
+</script>
+{% endblock %}
